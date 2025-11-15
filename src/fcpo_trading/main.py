@@ -10,7 +10,6 @@ from fcpo_trading.core.logging import setup_logging
 
 
 def create_app() -> FastAPI:
-    """Application factory for FastAPI app."""
     setup_logging()
 
     app = FastAPI(
