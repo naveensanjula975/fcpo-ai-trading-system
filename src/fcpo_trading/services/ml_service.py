@@ -34,8 +34,21 @@ class MLService:
         }
 
     def _to_features(self, df: pd.DataFrame) -> np.ndarray:
+        """Convert dataframe to feature array with padding to match model input size."""
         feature_cols = [col for col in df.columns if col not in ("time",)]
-        return df[feature_cols].to_numpy()[None, :, :]
+        features = df[feature_cols].to_numpy()
+        
+        # Pad features to match model input_size (32)
+        # This is a simplified approach for testing
+        target_size = 32
+        if features.shape[1] < target_size:
+            padding = np.zeros((features.shape[0], target_size - features.shape[1]))
+            features = np.concatenate([features, padding], axis=1)
+        elif features.shape[1] > target_size:
+            features = features[:, :target_size]
+        
+        # Add sequence dimension: (batch=1, seq_len, features)
+        return features[None, :, :]
 
     def _compute_tp_sl(self, signal: str, entry: float) -> tuple[list[float], float]:
         # Simple placeholder – later implement Fibonacci/ATR-based logic

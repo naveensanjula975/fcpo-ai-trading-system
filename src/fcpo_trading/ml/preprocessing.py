@@ -8,11 +8,23 @@ import pandas as pd
 
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Compute technical indicators on OHLCV data."""
-    # Add RSI, EMA, etc. Placeholder: simple moving averages
-    df["sma_20"] = df["close"].rolling(window=20).mean()
-    df["sma_50"] = df["close"].rolling(window=50).mean()
-    df["rsi_14"] = _compute_rsi(df["close"], period=14)
-    return df.dropna()
+    # Add RSI, EMA, etc. For single-row input, use simple features
+    if len(df) >= 20:
+        df["sma_20"] = df["close"].rolling(window=20).mean()
+    else:
+        df["sma_20"] = df["close"]  # Fallback for short sequences
+    
+    if len(df) >= 50:
+        df["sma_50"] = df["close"].rolling(window=50).mean()
+    else:
+        df["sma_50"] = df["close"]
+    
+    if len(df) >= 14:
+        df["rsi_14"] = _compute_rsi(df["close"], period=14)
+    else:
+        df["rsi_14"] = 50.0  # Neutral RSI for short sequences
+    
+    return df.bfill().ffill()
 
 
 def _compute_rsi(series: pd.Series, period: int = 14) -> pd.Series:

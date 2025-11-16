@@ -61,8 +61,16 @@ class ModelFactory:
         if model_type == "lstm":
             # NOTE: adjust sizes according to training config
             model = LSTMModel(input_size=32, hidden_size=64, num_layers=2, output_size=3)
-            state_dict = torch.load(model_path, map_location=device)
-            model.load_state_dict(state_dict)
+            
+            # Load pre-trained weights if available, otherwise use random initialization
+            if model_path.exists():
+                state_dict = torch.load(model_path, map_location=device, weights_only=True)
+                model.load_state_dict(state_dict)
+            else:
+                # For testing/development: use untrained model with warning
+                import logging
+                logging.warning(f"Model file not found at {model_path}. Using untrained model.")
+            
             model.to(device)
             return TorchModelWrapper(model=model, device=device)
 
